@@ -4,6 +4,10 @@ from selenium import webdriver
 import urllib
 import urllib2
 import os
+import re
+import codecs
+import extractProfile
+import extractCharacter
 
 def extract(source):
     pstart = source.find('Fact Sheets and Plant Guides',0)
@@ -51,7 +55,7 @@ def deleteSomething():
     for item in need_to_del:
         os.remove('./docs/' + item)
 
-def writeToFile(Labbr, Lsym, Lcmn):
+def writeToFileBasic(Labbr, Lsym, Lcmn):
     fp = open('./basics/basicInfo.txt','w')
     l = len(Lsym)
     for i in range(0, l):
@@ -59,16 +63,45 @@ def writeToFile(Labbr, Lsym, Lcmn):
     fp.flush()
     fp.close()
 
+def writeToFileProfile(Labbr):
+    fp = open('./basics/profile.csv','w')  #truncate
+    fp.close()
+    extractProfile.writeProfileLabelToFile()
+    for lb in Labbr:
+        try:
+            addr = 'https://plants.usda.gov/core/profile?symbol=' + lb
+            content = urllib.urlopen(addr).read()
+            extractProfile.getProfile(content)
+        except Exception as e:
+            print('profile_label ' + lb + ': ' + e.message)
+
+def writeToFileCharacteristics(Labbr):
+    fp = open('./basics/character.csv', 'w')
+    fp.close()
+    l = len(Labbr)
+    for i in range(0, l):
+        try:
+            addr = 'https://plants.usda.gov/java/charProfile?symbol=' + Labbr[i]
+            content = urllib.urlopen(addr).read()
+            if i == 0:
+                extractCharacter.writeColumnNamesToFile(content)
+            extractCharacter.writeCharacteristicToFile(Labbr[i],extractCharacter.getColumnNames(content), content)
+        except Exception as e:
+            print('character_label ' + Labbr[i] + ': ' + e.message)
+
+
 def main():
     request = webdriver.Chrome('/Users/apple/ChromeApp/chromedriver')
     request.get('https://plants.usda.gov/java/factSheet')
     str = request.page_source.encode('utf-8')
 
     Lret, Lsym, Lcmn, Labbr = extract(str)
-    writeToFile(Labbr, Lsym, Lcmn)
-
+    writeToFileBasic(Labbr, Lsym, Lcmn)
+    writeToFileProfile(Labbr)
+    writeToFileCharacteristics(Labbr)
     downloadByURL(Lret)
     deleteSomething()
+
 
 
 
