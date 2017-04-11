@@ -70,9 +70,20 @@ class mysqlManipulator:
         fpt = open(fileTXT, 'r')
         labels = extractTitle(fileXML)
         content = fpt.read()
-        self.handleTable(labels)
+        self.handleTable2(labels, fileTXT.find('fs_') != -1)
         self.__handleOtherData(labels, content, basicInfo, fileTXT.find('fs_') != -1)
         fpt.close()
+
+    def handleTable2(self, labels, is_fs = True):
+        prefix = 'fs_' if is_fs else 'pg_'
+        for lb in labels:
+            try:
+                sql = "ALTER TABLE usdaplant ADD COLUMN %s TEXT;"%('`' + prefix + stringlib.textToIdentifier(lb) + '`')
+                self.cursor.execute(sql)
+                self.connection.commit()
+            except Exception as e:
+                pass                 #duplicate column, neglect
+
 
     def handleTable(self, labels):
         for lb in labels:
@@ -122,7 +133,8 @@ def main():
     fp.close()
 
     fp = open('./basics/character.csv', 'r')
-    labels = fp.readline().strip().split(',')
+    labels = ['symbol']
+    labels += fp.readline().strip().split(',')
     mm.handleTable(labels)
     while True:
         line = fp.readline().strip()
@@ -133,3 +145,4 @@ def main():
 
 
 
+main()

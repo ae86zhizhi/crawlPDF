@@ -102,7 +102,8 @@ def main():
     downloadByURL(Lret)
     deleteSomething()
 
+main()
 
-
+q
 
 

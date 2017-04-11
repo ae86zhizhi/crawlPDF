@@ -17,7 +17,7 @@ def writeColumnNamesToFile(content):
     columnNames = getColumnNames(content)
     str = ''
     for name in columnNames:
-        str += name + ','
+        str += name.replace(',', '_') + ','
     output.write(str.strip().strip(',') + '\n')
     output.close()
     return columnNames

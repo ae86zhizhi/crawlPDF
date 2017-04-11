@@ -8,7 +8,7 @@ def text_to_sql(content):
 
 def textToIdentifier(content):
     x = ''
-    content = content.replace('\n', ' ').strip().strip(':')
+    content = content.replace('\n', ' ').strip(':')
     for i in range(0, len(content)):
         if not ('A' <= content[i] <= 'Z') and not ('a' <= content[i] <= 'z') and not ('0' <= content[i] <= '9') and content[i] != '_':
             x += '_'
